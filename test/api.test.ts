@@ -1,45 +1,15 @@
 import { describe, expect, beforeAll, afterAll, it } from "@jest/globals"
-
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Collection, Document, MongoClient } from "mongodb"
 import { MongoMemoryServer } from "mongodb-memory-server"
 import { configureApp } from "../src/appConfig"
 import { dataList } from "./mockData"
 import { getSnippetRouter } from "../src/routers"
 import { createFeatcher } from "./testUtil"
-import { createCollectionManager, filterProperty } from "../src/util"
+import { createCollectionManager } from "../src/util"
 import { CodeSnippetData } from "../src/types"
 const PORT = 9876
 
 const _fetch = createFeatcher(`http://localhost:${PORT}`)
-
-describe("Single MongoMemoryServer", () => {
-  let con: MongoClient
-  let mongoServer: MongoMemoryServer
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create()
-    con = await MongoClient.connect(mongoServer.getUri(), {})
-  })
-
-  afterAll(async () => {
-    if (con) {
-      await con.close()
-    }
-    if (mongoServer) {
-      await mongoServer.stop()
-    }
-  })
-
-  it("should successfully set & get information from the database", async () => {
-    const db = con.db(mongoServer.instanceInfo!.dbName)
-    expect(db).toBeDefined()
-    const col = db.collection("test")
-    const result = await col.insertMany([{ a: 1 }, { b: 1 }])
-    expect(result.insertedCount).toStrictEqual(2)
-    expect(await col.countDocuments({})).toBe(2)
-  })
-})
 
 describe("APIのテスト", () => {
   let con: MongoClient
@@ -136,13 +106,4 @@ describe("APIのテスト", () => {
         expect(status).toBe(404);
     });
   })
-  // it("タイトルで絞り込んでデータの取得が行える",() => {
-  //     // 1458a0ed83e4da620eec8dbf720c0ab6
-  // });
-  // it("コードを投稿できる",() => {
-
-  // });
-  // it("おかしな値で投稿できない(空白、undefined)",() => {
-
-  // });
 })

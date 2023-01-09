@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx jest"
+    "test": "npx jest",
+    "start": "ts-node --esm  src/index.ts"
   },
   "keywords": [],
   "author": "",
