@@ -6,22 +6,32 @@ type GETOption = {
 } & BasicOption
 type POSTOption = {
   method: "POST" | "PATCH" | "PUT"
-  body?: string
+  body?: Record<string, unknown>
 } & BasicOption
 
 type RequestOption = GETOption | POSTOption
 
 export const createFeatcher = (endpoint: string) => {
-  return async (path: string, option: RequestOption = { method: "GET" }) => {
+  return async (
+    path: string,
+    option: RequestOption = { method: "GET" }
+  ) => {
     try {
-      const res = await fetch(`${endpoint}${path}`, option)
+      const res = await fetch(
+        `${endpoint}${path}`,
+        option.method === "GET"
+          ? { ...option }
+          : {
+              ...option,
+              body: JSON.stringify(option.body),
+              headers: { "Content-Type": "application/json" },
+            }
+      )
       const { status } = res
-      const data = await res.json()
+      const data = await res.json();
       return { status, data }
-    } catch {
-      const res = await fetch(`${endpoint}${path}`, option)
-      const data = await res.text()
-      console.log({ data })
+    } catch (e){
+      console.error(e);
       throw new Error("エラー")
     }
   }

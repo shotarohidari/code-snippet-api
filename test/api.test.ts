@@ -7,7 +7,7 @@ import { getSnippetRouter } from "../src/routers"
 import { createFeatcher } from "./testUtil"
 import { createCollectionManager } from "../src/util"
 import { CodeSnippetData } from "../src/types"
-const PORT = 9876
+const PORT = 9654
 
 const _fetch = createFeatcher(`http://localhost:${PORT}`)
 
@@ -74,12 +74,38 @@ describe("APIのテスト", () => {
         }
         const { status } = await _fetch("/snippets/new", {
           method: "POST",
-          body: JSON.stringify(body),
+          body,
           headers: { "Content-Type": "application/json" }
         })
         expect(status).toBe(201);
       });
     });
+    describe("PATCH", () => {
+      it("既存のデータのコードを編集して保存できる", async () => {
+        const id = "3e87770e95f2ec48c5b94bff18212322"
+        const newCode = "console.log(\"Hello, Tamachan!\")";
+        const { data } = await _fetch(`/snippets/${id}/edit`,{method:"PATCH",body:{
+          code:newCode
+        }});
+        expect(data).toEqual({code:newCode});
+      });
+      it("必要なプロパティがない状況では更新できない", async () => {
+        const id = "3e87770e95f2ec48c5b94bff18212322"
+        const { status } = await _fetch(`/snippets/${id}/edit`,{method:"PATCH",body:{
+          
+        }});
+        expect(status).toEqual(400);
+      });
+      it("存在しないidでは更新できない", async () => {
+        const nonExistentId = "4u17770e95f2ec41k0b94bff18212964";
+        const newTitle = "無限アラート出す";
+        const newCode = "while(true){alert(\"無限アラート！\")}";
+        const { status } = await _fetch(`/snippets/${nonExistentId}/edit`,{method:"PATCH",body:{
+          code:newCode,title:newTitle
+        }});
+        expect(status).toBe(404);
+      })
+    })
   })
   describe("異常系", () => {
     it("存在しないidのデータは取得できない", async () => {
@@ -100,7 +126,7 @@ describe("APIのテスト", () => {
         }
         const { status } = await _fetch("/snippets/new", {
           method: "POST",
-          body: JSON.stringify(body),
+          body,
           headers: { "Content-Type": "application/json" }
         })
         expect(status).toBe(404);

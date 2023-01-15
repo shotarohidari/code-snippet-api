@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, UpdateFilter } from 'mongodb';
 import crypto from "node:crypto";
 export const createCollectionManager = (url:string,dbName:string,collectionName:string) => {
     const client = new MongoClient(url)
@@ -20,3 +20,11 @@ export const generateId = (length:number = 16) => crypto.randomBytes(length).toS
 
 export const createCurrentISODate = () => new Date().toISOString();
 
+export const filterUndefined = <T extends Record<string,unknown>>(obj:T) => {
+    return Object.keys(obj).reduce((newObj,key) => {
+        if(!obj[key]) {
+            return newObj
+        }
+        return {...newObj,[key]:obj[key]}
+    },{} as Record<string,unknown>)
+}
