@@ -22,6 +22,51 @@ const checkPropertyLength = (req:Request,res:Response,next:NextFunction) => {
     next();
 }
 
+const checkIsRequired = (requiredKeys:string[]) => {
+    return (req:Request,res:Response,next:NextFunction) => {
+        const docKeys = Object.keys(req.body);
+        const errors:{message:string}[] = [];
+        requiredKeys.forEach((requiredKey) => {
+            if(!docKeys.includes(requiredKey)) {
+                errors.push({message:`missing required key: ${requiredKey}`})
+            }
+        })
+        if(errors.length > 0) {
+            res.status(400).json(errors);
+            return;
+        }
+        next();
+    }
+}
+type TypeMapping = {key:string,type:"number"|"string"};
+const checkType = (typeMappings:TypeMapping[]) => {
+    return (req:Request,res:Response,next:NextFunction) => {
+        const doc = req.body;
+        const errors:{message:string}[] = [];
+        typeMappings.forEach(({key,type}) => {
+            switch(type) {
+                case "number":
+                    if(typeof doc[key] !== "number") {
+                        errors.push({message: `invalid key type. key: ${key} type:${type}`})
+                    }
+                    break;
+                case "string":
+                    if(typeof doc[key] !== "string") {
+                        errors.push({message: `invalid key type. key: ${key} type:${type}`})
+                    }
+                    break;
+                default:
+                    throw new Error("unknown error")
+            }
+        })
+        if(errors.length > 0) {
+            res.status(400).json(errors);
+            return;
+        }
+        next();
+    }
+}
+
 const updateDoc = (req:Request,res:Response,next:NextFunction) => {
     // reqのbodyを書き換える
     const {title,code} = req.body;
